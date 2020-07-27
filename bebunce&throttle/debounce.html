@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>防抖</title>
+    <style>
+        *{
+            margin: 0;
+            padding:0;
+        }
+        .applist{
+            overflow: scroll;
+        }
+        ul{
+
+        }
+        li{
+            height: 100px;
+            width: 100%;
+            border:2px solid #ccc;
+            list-style: none;
+        }
+        #btn{
+            width: 96%;
+            height: 200px;
+            margin: 2%;
+            text-align: center;
+            line-height: 200px;
+            font-size: 30px;
+            color: #000;
+            border: 1px solid #fff;
+            background: #7F7FD5;  /* fallback for old browsers */
+            background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);  /* Chrome 10-25, Safari 5.1-6 */
+            background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div id="btn">
+
+        </div>
+        <button onclick="cancelDeb()">取消函数防抖</button>
+        <ul class="applist">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+</body>
+<script>
+    
+    // 防抖函数：
+    /* 1 事件的函数在用户操作完之后的设定时间间隔后执行 */
+    /* 2 如果在设定时间间隔内再次调用，则重新计时 */
+
+    // 需要注意的问题：
+    /* 1 this的指向问题，默认指向windows 需要call 或apply指定当前使用函数的的this */
+    /* 2 获取event相关对象，通过arguments */
+    /* 3 第一次的立即执行 */
+    /* 4 取消防抖操作 */
+
+
+    function debounce(fn, delay, immediate){
+        if(!delay) delay = 200;
+        if(!immediate) immediate = false;
+        var timer = null;
+        var result;
+        var debounceFn = function(){        // 使用闭包
+            let args = arguments;
+            // this 指向到调用的函数
+            let _this = this;
+            if(timer) clearTimeout(timer)
+            // 立即执行逻辑
+            if(immediate){
+                let callNow = !timer;
+                timer = setTimeout(() => {
+                    timer = null
+                }, delay);
+                if(callNow) result = fn.apply(_this, args)
+            }else{
+                timer = setTimeout(function () {
+                    fn.apply(_this, args)
+                }, delay)
+            }
+            return result;
+        }
+        /* 取消防抖逻辑处理 */
+        debounceFn.cancel = function(){
+            clearTimeout(timer)
+            timer = null;
+        }
+        return debounceFn;
+    }
+
+    /* es6 */
+    /* const debounce = (fn, delay = 200) => {
+        let timer = null;
+        return function () {
+            let _this = this;
+            let args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                fn.apply(_this, args);
+            }, delay);
+        }
+    } */
+
+    // 滚动条位置测试
+    function showTop(e) {
+        let scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+        console.log('滚动条位置：' + scrollTop);
+    }
+    // window.onscroll = debounce(showTop, 1000)
+    window.onscroll = debounce(showTop, 500)
+    
+    // mousemove
+    let count = 1;
+    let btnDe = document.querySelector('#btn');
+    function mouseBtn(e){
+        console.log(this)
+        // 一些异步函数或请求数据
+        btnDe.innerHTML = '第'+ (count++) + '次'; 
+    }
+    let debounceFun = debounce(mouseBtn, 2000)
+    function cancelDeb() {
+        debounceFun.cancel()
+    }
+    btnDe.onmousemove = debounceFun
+    
+
+
+    /* 应用场景：频繁操作的事件 */
+    /* scroll 事件 */
+    /* resize窗口 */
+    /* 搜索框 */
+    /* 表单验证 */
+    /* 按钮提交 */
+</script>
+</html>
