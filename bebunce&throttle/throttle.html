@@ -24,12 +24,32 @@
             border: 2px solid #ccc;
             list-style: none;
         }
+
+        #btn {
+            width: 96%;
+            height: 200px;
+            margin: 2%;
+            text-align: center;
+            line-height: 200px;
+            font-size: 30px;
+            color: #000;
+            border: 1px solid #fff;
+            background: #7F7FD5;
+            /* fallback for old browsers */
+            background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+            /* Chrome 10-25, Safari 5.1-6 */
+            background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+            /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        }
     </style>
 </head>
 
 <body>
     <div class="app">
-        <input type="button" value="测试">
+        <div id="btn">
+
+        </div>
+        <button onclick="cancelDeb()">取消函数节流</button>
         <ul class="applist">
             <li></li>
             <li></li>
@@ -135,26 +155,147 @@
     </div>
 </body>
 <script>
-    function scrollTop() {
-        var scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
-        console.log('滚动条位置：' + scrollTop);
-    }
-    // 节流函数：
-    function throttle(fn, delay = 1000){
-        let flag = true;
-        return function(){
-            if(!flag){
-                return false
+
+    // 节流函数
+    /* 1 事件函数在一段间隔事件内只执行一次 */
+    /* 2 事件函数默认执行一次；可设置false */
+    /* 3 事件函数默认最后执行一次；可设置false */
+    /* 4 可以使用时间戳  或 定时器 实现 */
+
+    // 注意
+    /* 2 和 3 不能同时为false */
+
+    // 需要注意的问题：
+    /* 1 this的指向问题，默认指向windows 需要call 或apply指定当前使用函数的的this */
+    /* 2 获取event相关对象，通过arguments */
+    /* 3 第一次的立即执行 */
+    /* 4 取消节流操作 */
+
+    /* 使用时间戳 第一次触发，最后一次不触发*/
+    /* function throttle(fn, delay) {
+        var _this;
+        var args;
+        var result;
+        var beforeTime = 0;
+        return function() {
+            _this = this;
+            args = arguments;
+            var currentTime = (new Date()).getTime();
+            if(currentTime - beforeTime > delay){
+                fn.apply(_this, args)
+                beforeTime = currentTime;
             }
-            flag = false;
-            setTimeout(() => {
-                fn();
-                flag = true;
-            },delay)
+        }
+    } */
+
+    /* 使用定时器；第一次不触发，最后一次触发 */
+    /* function throttle(fn, delay){
+        var timer = null;
+        var _this;
+        var args;
+        return function(){
+            _this = this;
+            args = arguments;
+            if(!timer){
+                timer = setTimeout(() => {
+                    timer = null;
+                    fn.apply(_this, args);
+                }, delay);
+            }
+        }
+    } */
+
+    /* 使用定时器及时间戳；第一次不触发，最后一次也不触发 */
+    /* function throttle(fn, delay){
+        let timer = null;
+        let _this;
+        let args;
+        let beforeTime = 0;
+        return function(){
+            _this = this;
+            args = arguments;
+            let currentTime = (new Date()).getTime();
+            if(currentTime - beforeTime > delay){
+                if(timer){
+                    clearTimeout(timer)
+                    timer = null;
+                }
+                fn.apply(_this, args);
+                beforeTime = currentTime;
+            }else  if(!timer){
+                timer = setTimeout(() => {
+                    beforeTime = (new Date()).getTime()
+                    timer = null;
+                    fn.apply(_this, args);
+                }, delay);
+            }
+        }
+    } */
+
+    /* 传入第三个参数为对象；lending、trailing，可配置 */
+    function throttle(fn, delay, options){
+        if(!options) options = {};
+        let timer = null;
+        let _this;
+        let args;
+        let beforeTime = 0;
+        return function(){
+            let currentTime = (new Date()).getTime();
+            _this = this;
+            args = arguments;
+            if(options.lending === false && !beforeTime){
+                beforeTime = currentTime;
+            }
+            if(currentTime - beforeTime > delay ){
+                if(timer){
+                    clearTimeout(timer);
+                    timer = null;
+                }
+                fn.apply(_this, args);
+                beforeTime = currentTime;
+            } else if(!timer && options.trailing !== false){
+                timer = setTimeout(() => {
+                    beforeTime = (new Date()).getTime()
+                    timer = null;
+                    fn.apply(_this, args);
+                }, delay);
+            }
+            
         }
     }
+    
+    // 滚动条位置测试
+    function showTop(e) {
+        let scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+        console.log('滚动条位置：' + scrollTop);
+    }
+    // window.onscroll = throttle(showTop, 1000)
+    // window.onscroll = throttle(showTop, 2000)
+    window.onscroll = throttle(showTop, 2000, {
+        lending: false,
+        trailing: true
+    })
 
-    window.onscroll =throttle(scrollTop, 2000)
+    // mousemove
+    let count = 1;
+    let btnDe = document.querySelector('#btn');
+    function mouseBtn(e) {
+        console.log(this)
+        // 一些异步函数或请求数据
+        btnDe.innerHTML = '第' + (count++) + '次';
+    }
+    let throttleFun = throttle(mouseBtn, 2000, {
+        lending: true,
+        trailing: true
+    })
+    btnDe.onmousemove = throttleFun
+
+
+
+    /* 应用场景：需要一段时间需要操作 */
+    /* scroll 事件 */
+    /* DOM元素拖拽 */
+    /* 计算鼠标移动距离 */
 </script>
 
 </html>
